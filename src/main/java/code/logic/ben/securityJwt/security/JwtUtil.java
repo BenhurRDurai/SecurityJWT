@@ -31,6 +31,7 @@ public class JwtUtil {
 
     //    Expiration time in milliseconds
     private final int jwtExpirationMs = 86400000;
+    public boolean isTokenValid;
 
     @Autowired
     UserRepository userRepository;
@@ -51,23 +52,23 @@ public class JwtUtil {
 //    Extract Username
 
     public String extractUsername(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
     }
 
 //    Extract Roles
 
     public Set<String> extractRoles(String token) {
         String rolesString = Jwts.parserBuilder().setSigningKey(secretKey)
-                .build().parseClaimsJwt(token).getBody().get("roles", String.class);
+                .build().parseClaimsJws(token).getBody().get("roles", String.class);
 
-        return Set.of(rolesString);
+        return Set.of(rolesString.split(","));
     }
 
 //    Token Validation
 
-    public boolean isTokenValid(String token){
+    public static boolean isTokenValid(String token){
         try{
-            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJwt(token);
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
         }
         catch (JwtException | IllegalArgumentException e){
